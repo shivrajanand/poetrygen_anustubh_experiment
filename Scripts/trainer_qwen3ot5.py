@@ -1,4 +1,4 @@
-from unsloth import FastVisionModel
+from unsloth import FastLanguageModel
 import torch
 from datasets import load_dataset
 from unsloth.chat_templates import get_chat_template
@@ -10,57 +10,55 @@ from transformers import EarlyStoppingCallback
 import random
 
 import os
-# os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["TORCHINDUCTOR_DISABLE"] = "1"
 
 random.seed(42)
 torch.manual_seed(42)
 torch.cuda.manual_seed_all(42)
 
 HYPERPARAMS = {
-    "MODEL_NAME": "unsloth/Qwen3.5-9B",
+    "MODEL_NAME": "unsloth/Qwen3.5-27B",
     "MAX_LEN": 800, 
     # max token length calculated for entire text in chat template comes out as 852 for slp1 and 968 for DEV for phi model
     # max token length calculated for entire text in chat template comes out as 602 for DEV for gemma model
     # 777 for unsloth/Qwen3.5-9B
     "LOAD_IN_4BIT": True,
-    "BATCH_SIZE": 8,
+    "BATCH_SIZE": 4,
     "GRAD_ACC": 2,
     "EPOCHS": 10,
-    "LR": 1e-4,
+    "LR": 3e-5,
     "LOG_STEPS": 50,
     "SAVE_STEPS": 200,
     "SAVE_LIMIT": 3,
-    "EVAL_STEPS": 200,
+    "EVAL_STEPS": 100,
     "WEIGHT_DECAY": 0.01,
-    "WARMUP_RATIO": 0.03,
+    "WARMUP_RATIO": 0.05,
 
-    "LORA_R": 16,
-    "LORA_ALPHA": 32,
+    "LORA_R": 32,
+    "LORA_ALPHA": 64,
     "LORA_DROPOUT": 0.05,
     
     "ES_THRESHOLD": 0.001,
-    "ES_PATIENCE": 5,
+    "ES_PATIENCE": 8,
 
-    "OUTPUT_DIR": "Model_Qwen3dot_9B",
+    "OUTPUT_DIR": "Model_Qwen3dot_27B",
 
 }
 
 
-model, tokenizer = FastVisionModel.from_pretrained(
+model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=HYPERPARAMS["MODEL_NAME"],
     max_seq_length=HYPERPARAMS["MAX_LEN"],
     load_in_4bit=HYPERPARAMS["LOAD_IN_4BIT"]
 )
 
-model = FastVisionModel.get_peft_model(
-    model,
-    
-    finetune_vision_layers     = False, # False if not finetuning vision layers
-    finetune_language_layers   = True, # False if not finetuning language layers
-    finetune_attention_modules = True, # False if not finetuning attention layers
-    finetune_mlp_modules       = True, # False if not finetuning MLP layers
-    
+model = FastLanguageModel.get_peft_model(
+    model,    
     r=HYPERPARAMS["LORA_R"],
+    target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+                      "gate_proj", "up_proj", "down_proj",
+                      "out_proj",],
+    
     lora_alpha=HYPERPARAMS["LORA_ALPHA"],
     lora_dropout=HYPERPARAMS["LORA_DROPOUT"],
     bias="none",
@@ -153,7 +151,7 @@ data_collator = DataCollatorForSeq2Seq(
     padding=True
 )
 
-FastVisionModel.for_training(model)
+FastLanguageModel.for_training(model)
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,

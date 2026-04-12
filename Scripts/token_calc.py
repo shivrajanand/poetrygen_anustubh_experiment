@@ -7,8 +7,8 @@ import numpy as np
 # =========================
 MODEL_NAME = "unsloth/Qwen3.5-9B"
 CSV_PATH = "Dataset/anustubh_hn_sa_train.csv"
-COLUMNS = ['hi','sa']
-USE_INSTRUCTION = True
+COLUMNS = ['sa']
+USE_INSTRUCTION = False
 
 ANUSHTUP_INSTRUCTION = """The goal is to generate Sanskrit verse that follows the anushtup meter rules for the given input text.
 RULES:

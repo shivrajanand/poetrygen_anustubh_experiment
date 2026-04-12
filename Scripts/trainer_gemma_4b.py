@@ -1,5 +1,10 @@
-from unsloth import FastLanguageModel
+import os
+os.environ["TORCHINDUCTOR_DISABLE"] = "1"
+
 import torch
+torch._dynamo.config.disable = True
+
+from unsloth import FastLanguageModel
 from datasets import load_dataset
 from unsloth.chat_templates import get_chat_template
 from trl import SFTConfig, SFTTrainer
@@ -8,9 +13,6 @@ from unsloth.chat_templates import train_on_responses_only
 import json
 from transformers import EarlyStoppingCallback
 import random
-
-import os
-# os.environ["HF_HUB_OFFLINE"] = "1"
 
 random.seed(42)
 torch.manual_seed(42)
@@ -25,7 +27,7 @@ HYPERPARAMS = {
     "BATCH_SIZE": 8,
     "GRAD_ACC": 2,
     "EPOCHS": 10,
-    "LR": 2e-4,
+    "LR":3e-5,
     "LOG_STEPS": 50,
     "SAVE_STEPS": 200,
     "SAVE_LIMIT": 3,
@@ -40,7 +42,7 @@ HYPERPARAMS = {
     "ES_THRESHOLD": 0.001,
     "ES_PATIENCE": 5,
 
-    "OUTPUT_DIR": "Model_Gemma4_dev",
+    "OUTPUT_DIR": "Model_Gemma4_TRY2",
 
 }
 
@@ -173,14 +175,14 @@ trainer = SFTTrainer(
     ),
 )
 
-# trainer = train_on_responses_only(
-#     trainer,
-#     instruction_part="<|im_start|>user<|im_sep|>",
-#     response_part="<|im_start|>assistant<|im_sep|>",
-# )
+trainer = train_on_responses_only(
+    trainer,
+    instruction_part="<start_of_turn>user\n",
+    response_part="<start_of_turn>model\n",
+)
 
-# trainer.train(resume_from_checkpoint="Model_Gemma4_dev/checkpoint-2600")
-trainer.train()
+trainer.train(resume_from_checkpoint="Model_Gemma4_TRY2/checkpoint-3000")
+# trainer.train()
 
 print("BEST MODEL STATS")
 print(trainer.state.best_model_checkpoint)

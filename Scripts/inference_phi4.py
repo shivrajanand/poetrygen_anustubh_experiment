@@ -8,7 +8,7 @@ from tqdm import tqdm
 # =========================
 # PATHS
 # =========================
-BASE_MODEL = "phi4_local"
+BASE_MODEL = "unsloth/phi-4"
 LORA_PATH = "Phi4-14B-DEV/checkpoint-3400"
 INPUT_CSV = "anustubh_hn_sa_test.csv"
 OUTPUT_CSV = "anustubh_poetry_phi4_DEV_sampling_plus3shot.csv"

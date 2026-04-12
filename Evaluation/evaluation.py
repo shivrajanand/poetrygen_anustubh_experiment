@@ -145,6 +145,7 @@ if __name__ == '__main__':
     poetry_col = sys.argv[3]
 
     df = pd.read_csv(csvpath)
+    df.dropna(inplace=True)
     inputs = df[prose_col].tolist()
     poetry_outputs = df[poetry_col].tolist()
 

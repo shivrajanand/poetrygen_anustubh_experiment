@@ -17,7 +17,7 @@ torch.manual_seed(42)
 torch.cuda.manual_seed_all(42)
 
 HYPERPARAMS = {
-    "MODEL_NAME": "phi4_local",
+    "MODEL_NAME": "unsloth/phi-4",
     "MAX_LEN": 1024, # max token length calculated for entire text in chat template comes out as 852 for slp1 and 968 for DEV
     "LOAD_IN_4BIT": True,
     "BATCH_SIZE": 8,
